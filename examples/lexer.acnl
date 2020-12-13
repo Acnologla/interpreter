@@ -1,0 +1,116 @@
+import "string"
+operators := ["+", "-", "=", "==", "*", "/", "(", ")", "**", ":=", ":", ",", "{", "}", ">", "<", "[", "]", ".", "++", "--", "!=", "%"]
+keywords :=  ["fn", "if", "else", "ret", "for", "break", "import", "async", "await"]
+breakers :=  [";", "\n", " ", "\t", "\r"]
+
+fn lex(code, i){
+    actual := code[i]
+    if actual == " "{
+        ret [null, i + 1]
+    }
+    if actual == "\t" || actual == "\r"{
+        ret [null, i + 2]
+    }
+    if stringIncludes(breakers, actual) == true{
+        ret [{
+            type: 4
+        }, i + 1]
+    }
+    if actual == '"'  || actual == "'"{
+        breaker := actual
+        i++
+        old := i
+        for ;len(code) != i;i++{
+            if code[i] == breaker{
+                break
+            }
+        }
+        str := stringSlice(code, old, i)
+        i++
+        ret [{
+            type: 3,
+            value: str
+        }, i]  
+    }
+    realNumber := toInt(actual)
+    if realNumber != "NaN"{
+        number := actual
+        i++
+        for ;len(code) != i ; i++{
+            isN := toInt(code[i])
+            if isN == "NaN" && code[i] != "."{
+                 isN2 := toInt(number)
+                 if isN2 == "NaN"{
+                     ret [{
+                         type: 4
+                     }, i ]
+                 }
+                 ret [{
+                     type: 2,
+                     value: number
+                 }, i ]
+            }
+            number = number + code[i]
+        }
+    }
+    if realNumber == "NaN" && isChar(code[i]) == false{
+        operator := ""
+        init := i 
+        for ;len(code) != i;i++{
+            if toInt(code[i]) != "NaN" || isChar(code[i]) == true || stringIncludes(breakers,code[i]) == true{
+                break
+            }
+            operator = operator + code[i]
+        }
+        if stringIncludes(operators,operator) == true{ 
+            ret [{
+                type:5,
+                value: operator
+            }, i]
+        }else{
+            for j := len(operator); 0 < j;j--{
+                if stringIncludes(operators, stringSlice(operator,0,j)) == true {
+                    ret [{
+                        type: 5,
+                        value: stringSlice(operator,0,j)
+                    }, init + j]
+                }
+            }
+        }
+    }
+    acc := ""
+    for ;len(code) !=i;i++{
+         if toInt(code[i]) == "NaN" && isChar(code[i]) == false{
+             break
+         }
+         if stringIncludes(breakers,code[i]) == true{
+             break
+         }
+         acc = acc + code[i]
+    }
+    if stringIncludes(keywords,acc) == true{
+        ret [{
+            type: 6,
+            value: acc
+        },i]
+    }
+    [{
+        type: 7,
+        value: acc
+    },i]
+}
+
+
+fn Lex(code){
+    lexems := []
+    code = code + "\n"
+    for i:=0; i < len(code)-1;{
+        lexem := lex(code,i)
+        i = lexem[1]
+        if lexem[0] != null{
+            lexems = append(lexems,lexem[0])
+        }
+    }
+    print(lexems)
+}
+Lex("a := 2\nprint(a)")
