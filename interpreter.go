@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"reflect"
 	"strconv"
+	"github.com/acnologla/interpreter/libs"
+    "path/filepath"
 	"strings"
 )
 
@@ -533,16 +535,21 @@ func visit(intToken interface{}) interface{} {
 	}
 	if token.Value == "import" {
 		importPath := token.Left.(string)
-		var content []byte
-		var err error
+		var content string
 		if strings.HasPrefix(importPath, "/"){
-			content, err = ioutil.ReadFile(fmt.Sprintf(".%s", importPath))
+			path, _ := filepath.Abs("./")
+			contentByte, err := ioutil.ReadFile(fmt.Sprintf("%s%s",path ,importPath))
+			if err != nil{
+				fmt.Println("Invalid file")
+				return nil
+			}
+			content = string(contentByte)
 		}else{
-			content, err = ioutil.ReadFile(fmt.Sprintf("./libs/%s.acnl", importPath))
-		}
-		if err != nil {
-			fmt.Println("Invalid file")
-			return nil
+			content = libs.Libs[importPath]
+			if content == ""{
+				fmt.Println("Invalid file")
+				return nil
+			}
 		}
 		lexems := Lex(string(content))
 		token := Parse(lexems)
