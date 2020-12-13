@@ -14,6 +14,6 @@ func Run(code string, params map[string]interface{}) interface{} {
 
 func Init(params map[string]interface{}){
 	for key, value := range params{
-		interpreter.Change(key, value)
+		Change(key, value)
 	}
 }
