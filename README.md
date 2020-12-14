@@ -13,3 +13,4 @@ func main(){
 }
 
 ```
+[More examples](https://github.com/Acnologla/interpreter/tree/master/examples)
