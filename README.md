@@ -1,6 +1,6 @@
 # interpreter
 
-Golang interpreter for acnolang
+Interpreter for acnolang
 
 # Example usage
 
