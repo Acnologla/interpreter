@@ -317,10 +317,18 @@ func visit(intToken interface{}) interface{} {
 		}
 		return false
 	}
+	if token.Value == "ternary"{
+		condition, ok := visit(token.Left).(bool)
+		ternaryConditions := token.Right.(*Token)
+		if !ok  || condition{
+			return visit(ternaryConditions.Left)
+		}
+		return visit(ternaryConditions.Right)
+	}
 	if token.Value == "if" {
 		condition, ok := visit(token.Left).(bool)
 		if !ok {
-			return false
+			return visit(token.Right)
 		}
 		if condition {
 			return visit(token.Right)

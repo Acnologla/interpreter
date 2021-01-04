@@ -39,7 +39,7 @@ var stringTypes = map[int]string{
 
 var comparators = []string{">", "==", "!=", "<"}
 var logicOperators = []string{"||","&&"}
-
+var ternary = []string{"?", ":"}
 func (this *Parser) CreateToken(left interface{}, value string, right interface{}) *Token {
 	return &Token{
 		Left:  left,
@@ -219,12 +219,24 @@ func (this *Parser)  AccComparators() * Token{
 	}
 	return old
 }
-
-func (this *Parser) Expr() *Token {
+func (this *Parser) AccLogicOperators() *Token {
 	old := this.AccComparators()
 	for this.Current().Type == 5 && utils.Includes(logicOperators, this.Current().Value) {
 		op := this.Eat(5)
 		old = this.CreateToken(old, op.Value, this.AccComparators())
+	}
+	return old
+}
+
+
+func (this *Parser) Expr() *Token {
+	old := this.AccLogicOperators()
+	for this.Current().Type == 5 && this.Current().Value == "?" {
+		this.Eat(5)
+		valTrue := this.Parse()
+		this.Eat(5)
+		valFalse := this.Parse()
+		old = this.CreateToken(old, "ternary",  this.CreateToken(valTrue, "ternaryConditions", valFalse))
 	}
 	return old
 }
